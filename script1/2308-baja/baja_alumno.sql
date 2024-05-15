@@ -1,0 +1,1 @@
+update co_alumno set dio_baja = modifico where eliminado = true;

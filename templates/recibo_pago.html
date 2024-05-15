@@ -1,0 +1,171 @@
+
+<table width="90%" border="1" cellspacing="0" cellpadding="0">
+	<tr>
+        <td>
+        	<table width="100%" border="0" cellspacing="3" cellpadding="3">
+            	<tr>
+                	<td>
+                    	 <img style="height:70px;" src="{{& logotipo}}" />
+                    </td>
+                    <td  width="30%"  align="right">
+                    	<table width="100%" style="height: 70px;border: 1px solid black;text-align: center; border-radius: 5px;"  cellspacing="1">
+                        	<tr bgcolor="red" style="color:#fff;">
+                            	<td style="border: 0px solid black;text-align: center; border-radius: 5px;">
+                    				<strong>Recibo</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td>
+                    			<strong>000</strong>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    
+                </tr>
+            </table>            
+        </td>        
+    </tr>
+
+    <tr>
+        <td >
+          
+          <table width="100%"  style="height: 70px;border: 0px solid black;text-align: left;"   border="0" cellspacing="3" cellpadding="3">
+            	<tr>
+                	<td>
+                    	<p>direccion</p>
+                        <p>RFC</p>
+                        <p>Plantel</p>
+                        <p>Domicilio suc </p>
+                    </td>
+                    <td  width="30%"  align="right">
+                    	<table width="100%" style="height: 70px;border: 1px solid black;text-align: center;"  cellspacing="1">
+                        	<tr bgcolor="white" style="color:black;">
+                            	<td style="border-bottom: 1px solid gray;">
+                    				<strong>Fecha</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td>
+                    							2022-01-01                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    
+                </tr>
+            </table>            
+          
+        </td>
+    </tr>
+   
+    <tr>
+        <td >
+        <!-- datos alumno -->
+        <table width="100%"  style="border: 0px solid black;text-align: left;"   border="0" cellspacing="3" cellpadding="3">
+            	<tr>
+                	<td width="15%">
+                    	<p><strong>Alumno</strong></p>                        
+                    </td>                 
+                    <td>
+                    	<p>{{nombre_alumno}}</strong></p>                                            </td>                 
+                </tr>
+                <tr>
+                	<td width="15%">
+                    	<p><strong>Turno</strong></p>                        
+                    </td>                 
+                    <td>
+                    	<p>{{turno}}</p>                                            </td>                 
+                </tr>
+                <tr>
+                	<td width="15%">
+                    	<p><strong>Semana</strong></p>                        
+                    </td>                 
+                    <td>
+                    	<p>{{turno}}</p>                                            </td>                 
+                </tr>
+                <tr>
+                	<td width="15%">
+                    	<p><strong>Taller</strong></p>                        
+                    </td>                 
+                    <td>
+                    	<p>{{taller}}</p>                                            </td>                 
+                </tr>
+            </table>    
+          
+        </td>
+    </tr>
+    <tr>
+        <td class="bodycopy">
+            <br/>
+            <table width="100%" style="background-color:white">
+                <tr>
+                    <td  width="15%"><strong>Fecha</strong></td>
+                    <td>{{pago.fecha}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Forma de Pago</strong></td>
+                    <td>{{pago.forma_pago}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Sucursal</strong></td>
+                    <td>{{sucursal.nombre}}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><small>{{sucursal.direccion}}</small></td>
+                </tr>
+            </table>
+            <br/>
+
+            <!--[if (gte mso 9)|(IE)]>
+      <table width="600" align="center" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+    <![endif]-->
+
+            <table width="100%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <th  style="border-bottom:1pt solid #57A8B6;" >Descripción</th>
+                    <!--<th>Adeuda</th>-->
+                    <th style="border-bottom:1pt solid #57A8B6;" width="10%">Cant.</th>
+                    <th style="border-bottom:1pt solid #57A8B6;text-align:right" width="15%" align="right">Cargo</th>                    
+                    <th style="border-bottom:1pt solid #57A8B6;text-align:right" width="15%" align="right">Pagado</th>
+                    <th style="border-bottom:1pt solid #57A8B6;text-align:right" width="15%" align="right">Adeuda</th>
+                    <!--<th>Nota</th>-->
+                </tr>
+                <!-- {{#pagado}} PAGADO {{/pagado}}-->
+                {{#pago.cargos}}
+                <!-- IF -->
+                <tr style="text-align:center">
+                    <td style="border-bottom:1pt solid #57A8B6;">{{nombre_cargo}} {{texto_ayuda}}                   
+                               
+
+                    </td>
+                    <td style="border-bottom:1pt solid #57A8B6;">{{cantidad}}</td>
+                    <td style="border-bottom:1pt solid #57A8B6;text-align:right" align="right">${{cargo}}</td>
+                    
+                    <td style="border-bottom:2pt solid #57A8B6;text-align:right" align="right">${{total_pagado}}</td>
+                    <td style="border-bottom:2pt solid #57A8B6;text-align:right" align="right">${{total}}</td>
+                    <!--<td>{{nota}}</td>-->
+                </tr>
+                {{/pago.cargos}}
+                <tr>
+                    <td colspan="5" style="text-align:right">
+                        <strong>Pago recibido:</strong>
+
+                    </td>
+                    <td style="border-bottom:2pt solid #57A8B6;text-align:right;background-color:#F7F7F7" align="right">
+                        <h4><strong> ${{pago.pago}}</strong> </h4>
+                    </td>
+            </tr>
+          </table>
+        </td>
+      </tr>              
+                
+</table>
+
+<!--analytics-->
+<!--<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="http://tutsplus.github.io/github-analytics/ga-tracking.min.js"></script>
+-->
+

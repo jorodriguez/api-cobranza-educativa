@@ -1,0 +1,155 @@
+
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+        <td style="border-bottom: 1px solid gray;">
+        	<table width="100%" border="0" cellspacing="3" cellpadding="3">
+            	<tr>
+                	<td>
+                    	 <img style="height:70px;" src="{{& logotipo}}" />
+                    </td>
+                    <td  width="30%"  align="right">
+                    	<table width="100%" style="height: 70px;border: 1px solid black;text-align: center; border-radius: 5px;"  cellspacing="1">
+                        	<tr  style="background:#F062C9; color:#fff;">
+                            	<td style="border: 0px solid black;text-align: center; border-radius: 5px;">
+                    				<strong>Recibo</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td>
+                    			<strong>{{folio}}</strong>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    
+                </tr>
+            </table>            
+        </td>        
+    </tr>
+
+    <tr>
+        <td style="border-bottom: 1px solid gray;">
+          
+          <table width="100%"  style="height: 70px;border: 0px solid black;text-align: left;"   border="0" cellspacing="3" cellpadding="3">
+            	<tr>
+                	<td>
+                    	<p>{{direccion_empresa}}</p>
+                        <p>{{rfc}}</p>
+                        <p>{{nombre_sucursal}}</p>
+                        <p>{{direccion_sucursal}} </p>
+                    </td>
+                    <td  width="30%"  align="right">
+                    	<table width="100%" style="height: 70px;border: px solid black;text-align: center;"  cellspacing="1">
+                        	<tr bgcolor="white" style="color:black;">
+                            	<td style="border-bottom: 1px solid gray;">
+                    				<strong>Fecha</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td>
+                    							{{fecha}}                               </td>
+                            </tr>
+                        </table>
+                    </td>
+                    
+                </tr>
+            </table>            
+          
+        </td>
+    </tr>
+   
+    <tr>
+        <td style="border-bottom: 1px solid gray;">
+        <!-- datos alumno -->
+        <table width="100%"  style="border: 0px solid black;text-align: left;"   border="0" cellspacing="3" cellpadding="3">
+            	<tr>
+                	<td width="15%">
+                    	<p><strong>Alumno</strong></p>                        
+                    </td>                 
+                    <td>
+                    	<p>{{nombre_alumno}} {{apellidos_alumno}}</strong></p>                                            </td>                 
+                </tr>
+                           
+            </table>    
+          
+        </td>
+    </tr>
+    <tr>
+        <td style="border-bottom: 1px solid gray;">
+            <br/>
+            <table width="100%" style="background-color:white">
+                <tr>
+                    <td  width="15%"><strong>Fecha</strong></td>
+                    <td>{{fecha}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Forma de Pago</strong></td>
+                    <td>{{forma_pago}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Sucursal</strong></td>
+                    <td>{{nombre_sucursal}}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><small>{{direccion_sucursal}}</small></td>
+                </tr>
+            </table>
+            <br/>
+
+            <!--[if (gte mso 9)|(IE)]>
+      <table width="600" align="center" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td>
+    <![endif]-->
+
+            <table width="100%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <th  style="border-bottom:1pt solid #57A8B6;text-align: left;" >Descripción</th>
+                    <!--<th>Adeuda</th>-->
+                    <th style="border-bottom:1pt solid #57A8B6;" width="10%">Cant.</th>
+                    <th style="border-bottom:1pt solid #57A8B6;text-align:right" width="15%" align="right">Cargo</th>                    
+                    <th style="border-bottom:1pt solid #57A8B6;text-align:right" width="15%" align="right">Pagado</th>
+                    <th style="border-bottom:1pt solid #57A8B6;text-align:right" width="15%" align="right">Adeuda</th>
+                    <!--<th>Nota</th>-->
+                </tr>
+                <!-- {{#pagado}} PAGADO {{/pagado}}-->
+                {{#cargos}}
+                <!-- IF -->
+                <tr style="text-align:left">
+                    <td style="border-bottom:1pt solid #57A8B6;">{{nombre_cargo}}                   
+                   {{#especialidad}}             
+                 <p style="color:gray">{{especialidad}}</p>
+                  {{/especialidad}}
+                  {{#numero_semana}}             
+                 <p style="color:gray"> {{numero_semana}}</p>
+                 {{/numero_semana}}            
+                 {{#materia}}
+                 <p style="color:gray"> {{materia}}</p>
+                 {{/materia}}
+
+                    </td>
+                    <td style="border-bottom:1pt solid #57A8B6;">{{cantidad}}</td>
+                    <td style="border-bottom:1pt solid #57A8B6;text-align:right" align="right">${{cargo}}</td>
+                    
+                    <td style="border-bottom:2pt solid #57A8B6;text-align:right" align="right">${{total_pagado}}</td>
+                    <td style="border-bottom:2pt solid #57A8B6;text-align:right" align="right">${{total}}</td>
+                    <!--<td>{{nota}}</td>-->
+                </tr>
+                {{/cargos}}
+                <tr>
+                    <td colspan="4" style="text-align:right">
+                        <strong>Pago recibido:</strong>
+
+                    </td>
+                    <td style="border-bottom:2pt solid #57A8B6;text-align:right;background-color:#F7F7F7" align="right">
+                        <h4><strong> ${{pago}}</strong> </h4>
+                    </td>
+            </tr>
+          </table>
+        </td>
+      </tr>              
+                
+</table>

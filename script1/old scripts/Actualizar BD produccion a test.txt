@@ -1,0 +1,66 @@
+
+1- correr el comando 
+
+--timezone
+
+ 
+		 show timezone		 
+		 SET TIME ZONE 'Mexico/General';
+		 SET TIME ZONE 'Mexico/General';
+ SET timezone TO 'Mexico/General';
+ 
+
+2- despues correr el comando
+update co_familiar 
+SET token = (select token from co_familiar where id=54)	
+where token is not null and token <> 'joel.rod.roj@hotmail.com';
+
+update co_familiar 
+set correo = 'joel@magicintelligence.com' where correo not in ('sb.teres@gmail.com','joel.rod.roj@hotmail.com')
+
+
+update co_familiar 
+set correo = 'joel@magicintelligence.com'
+
+update co_correo_copia_notificacion set correo = 'velocirraptor79.1@gmail.com'
+
+-- eliminar copias de usuarios en correos
+select * from co_usuario_notificacion 
+
+update co_usuario_notificacion set eliminado = true;
+
+
+-- ELIMINAR REGISTROS PARA PERMITIR PLAN DE 10 MIL 
+select count(*) from co_asistencia where to_char(fecha,'YY') = '19'
+
+ delete from co_asistencia where to_char(fecha,'YY') = '19'
+
+
+------------------REVISAR POR SI SE OCUPA ALGO--------------------
+delete from log;
+delete from si_notificacion;
+delete from co_asistencia where fecha::date <= getDate('') - 30; -- solo los ultimos 30 dias
+delete from co_hora_extra;
+delete from co_asistencia_usuario where fecha <= (getDate('') - 60); -- solo los ultimos 60 dias
+delete from co_emocion_actividad;
+delete from co_gasto where fecha <=  (getDate('') - 20); -- solo los ultimos 20 dias
+update usuario set password = '$2a$08$XOjFNU1bEQ4YjNm0/jfvJO4CVbqYKy/DZV0B1QtWuwWFcnh2bmKOC';
+
+update usuario set password = '$2a$08$XOjFNU1bEQ4YjNm0/jfvJO4CVbqYKy/DZV0B1QtWuwWFcnh2bmKOC';
+
+update co_familiar 
+SET token = (select token from co_familiar where id=54)	
+where token is not null and token <> 'joel.rod.roj@hotmail.com';
+
+update co_familiar 
+set correo = 'joel@magicintelligence.com' where correo not in ('sb.teres@gmail.com','joel.rod.roj@hotmail.com')
+
+update co_correo_copia_notificacion set correo = 'velocirraptor79.1@gmail.com';
+
+--------------------
+
+
+eliminar cargos
+delete from co_pago_balance_alumno where to_char(fecha,'YY') = '20'
+
+delete from co_pago_cargo_balance_alumno where to_char(fecha,'YY') = '20'

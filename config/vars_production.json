@@ -1,0 +1,21 @@
+{    
+    "configMail": {
+        "host": "magicintelligence.com",
+        "port": 465,
+        "secureConnection": false,
+        "auth": {
+            "user": "info@magicintelligence.com",
+            "pass": "@7FohByr!0(6kD#1&wiy"
+        },
+        "tls": {
+            "ciphers": "SSLv3"
+        }
+    },
+    "mailOptions": {
+        "from": "Magic Intelligence <info@magicintelligence.com>",
+        "cc": "info@magicintelligence.com"
+    },
+    "template_mail":{
+        "mensaje_pie":"Agradecemos tu confianza. <br/> Atentamente Magic Intelligence."
+    }
+}

@@ -1,0 +1,127 @@
+
+
+
+select * from co_alumno where matricula = 'P22-1'
+
+
+update co_alumno set eliminado = true,modifico=1 where id = 8;
+
+update co_inscripcion set eliminado = true,modifico=1 where co_alumno = 8;
+
+select * from co_inscripcion where co_alumno = 8
+
+
+select * from 
+
+
+select * from cat_cargo where eliminado = true
+
+update cat_Cargo set eliminado = false,
+			nombre='Graduación',
+			descripcion='Graduación',
+			precio=1,
+			sistema=true,
+			escribir_cantidad = false,
+			escribir_monto =true,
+			seleccionar_fecha=false			
+where id = 1006;
+
+
+modificar el pago del unifome de 280 a 210 
+
+select * from co_alumno where  matricula='P22-1'
+
+select * from co_inscripcion where co_alumno = 30
+
+select * from co_cargo_balance_alumno where co_alumno = 1
+
+
+17922
+
+select nombre ||' '||apellidos from co_alumno
+
+
+ select * from co_cargo_balance_alumno where eliminado = false and fecha::date = getDate('')
+
+select sum(total) from co_cargo_balance_alumno where eliminado = false and fecha::date = getDate('')
+
+select fecha,pago,* from co_pago_balance_alumno where eliminado = false and fecha::date = getDate('') order by fecha asc
+
+select * from co_pago_balance_alumno where eliminado = false and fecha::date = getDate('')-- order by fecha asc
+
+ select --rel.id as co_pago_cargo_balance_alumno,		
+ 			pago.folio,
+                rel.pago,                
+                to_char(pago.fecha,'DD-MM-YYYY HH24:MI') as fecha,		                
+                al.nombre||' '||al.apellidos as alumno,                 
+                tipo_cargo.nombre as cargo,                
+                fpago.nombre as forma_pago,
+                esp.nombre as especialidad,
+                tipo_cargo.nombre||' '||semana.numero_semana_curso as concepto,                
+                to_char(curso.hora_inicio,'HH24:mi')||' - '||to_char(curso.hora_fin,'HH24:mi') as horario,
+                pago.nota
+            from co_pago_cargo_balance_alumno rel inner join co_pago_balance_alumno pago on pago.id = rel.co_pago_balance_alumno
+                            inner join co_cargo_balance_alumno cargo on cargo.id = rel.co_cargo_balance_alumno
+                            inner join cat_cargo tipo_cargo on tipo_cargo.id = cargo.cat_cargo
+                            inner join co_alumno al on al.id = pago.co_alumno
+                            inner join co_forma_pago fpago on fpago.id = pago.co_forma_pago
+                            left join co_curso curso on curso.id = cargo.co_curso                            
+                            left join cat_especialidad esp on esp.id = curso.cat_especialidad
+                            left join co_curso_semanas semana on semana.id = cargo.co_curso_semanas                            
+            where pago.fecha::date = getDate('')  --::date between $2::date and $3::date
+                    and rel.co_sucursal = 1
+                    and rel.eliminado = false
+                    and pago.eliminado = false
+                    and cargo.eliminado = false
+            order by pago.folio
+
+
+
+
+select 39 * 9
+
+update co_cargo_balance_alumno set cargo = 230,total_pagado=230 where id = 17922
+
+select * from co_pago_cargo_balance_alumno where co_cargo_balance_alumno = 17922
+
+update co_pago_cargo_balance_alumno set pago = 230 where id=12
+
+
+--ALTER SEQUENCE co_detalle_balance_alumno_id_seq RESTART WITH 1;
+
+SELECT c.* FROM pg_class c WHERE c.relkind = 'S';
+
+
+update co_inscripcion set costo_colegiatura = 210 where id = 30
+
+update usuario set  correo='inscripciones_mty@gmail.com', password = '$2a$08$PzPdwrefQlqDMZZz0LN5neIUSA8W2XJUToLfdGqthf1FN.3VZ47ki' where id = 124
+
+
+
+
+
+CREATE or replace FUNCTION getCurrentTime(IN zona text,OUT hora time without time zone ) AS $$
+BEGIN  
+ select current_time at time zone 'America/Monterrey' INTO hora;
+END;
+$$ 
+LANGUAGE 'plpgsql';
+
+
+
+select current_time at time zone 'America/Monterrey' 
+
+show timezone;
+
+
+
+select current_date at time zone 'America/Monterrey'
+
+--SET TIMEZONE='America/Monterrey';
+
+SET TIMEZONE='GMT';
+
+select now() 
+
+select getDate('')
+select getHora('')

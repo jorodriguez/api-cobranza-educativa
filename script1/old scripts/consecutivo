@@ -1,0 +1,244 @@
+select  * from usuario --where correo = 'paris1@hotmail.com'
+
+delete from usuario where id > 17
+
+select  * from co_sucursal
+
+
+
+select  * from si_usuario_sucursal_rol 
+
+delete from si_usuario_sucursal_rol
+where usuario in (
+	select id from usuario where id > 17
+)
+
+
+create table co_consecutivo(
+	id serial not null primary key,	
+	nombre text not null,
+	identificador text not null,
+	anio text not null,
+	valor integer not null,	
+	co_sucursal integer not null references co_sucursal(id) ,
+	co_empresa integer not null references co_empresa(id),
+	genero integer not null references usuario(id),
+	fecha_genero timestamp default current_timestamp,
+	modifico integer references usuario(id),
+	fecha_modifico timestamp,
+	eliminado boolean default false	
+);
+
+CREATE UNIQUE INDEX consecutivo_sucursal_empresa ON co_consecutivo (identificador,co_sucursal,co_empresa);
+
+select * from co_consecutivo
+
+--sucursal
+insert into co_consecutivo(nombre,identificador,anio,valor,co_sucursal,co_empresa,genero)
+values('RECIBO_PAGO','RECIBO_PAGO','22',0,1,1,1);
+
+insert into co_consecutivo(nombre,identificador,anio,valor,co_sucursal,co_empresa,genero)
+values('RECIBO_PAGO','RECIBO_PAGO','22',0,2,1,1);
+
+
+select * from obtener_consecutivo('RECIBO_PAGO',1)
+
+--
+drop function obtener_consecutivo(text,integer)
+
+select * from co_consecutivo
+
+select * from co_consecutivo where identificador = '' and co_sucursal = id_sucursal
+
+CREATE OR REPLACE FUNCTION public.obtener_consecutivo(IN identificador_param text,IN id_sucursal integer,OUT consecutivo co_consecutivo)  
+AS $function$
+DECLARE
+	fecha_current timestamp;
+	retorno integer := 0;
+	consecutivo_anterior RECORD;
+	--consecutivo co_consecutivo%ROWTYPE;	
+	anio_current text;
+	sqlerr_message_text TEXT;
+	sqlerr_exception_detail TEXT;
+	sqlerr_exception_hint TEXT;							
+
+BEGIN    
+
+	raise notice 'OBTENER CONSECUTIVO';			
+		 
+		--consultar el consecutivo actual	
+	select * from co_consecutivo where identificador = identificador_param and co_sucursal = id_sucursal INTO consecutivo_anterior;
+
+	raise notice 'consecutivo_anterior %',consecutivo_anterior;
+	
+	IF FOUND THEN				
+				fecha_current := ((getDate('')+getHora(''))::timestamp);										
+				raise notice 'consecutivo_anterior %',consecutivo_anterior;								
+
+				---select EXTRACT(YEAR FROM fecha_current)::integer INTO anio_current;		
+
+				select to_char(((getDate('')+getHora(''))::timestamp),'YY') into anio_current;
+
+				IF anio_current = consecutivo_anterior.anio THEN
+					--son iguales los años, procedera generar un nuevo consecutivo
+					 update co_consecutivo 
+					 set valor = (consecutivo_anterior.valor+1)
+					 where id = consecutivo_anterior.id
+					 returning *
+					 INTO consecutivo;
+					 
+				ELSE
+					--son DIFERENTES los años, procedera generar un nuevo consecutivo y actualizar el año
+					update co_consecutivo 
+					 set valor = (consecutivo_anterior.valor+1),
+					 	anio = anio_current,
+					 	valor = 1
+					 where id = consecutivo_anterior.id
+					 returning *
+					 INTO consecutivo;
+				END IF;			   			
+			
+	ELSE
+		raise notice 'NO EXISTE EL IDENTIFICADOR';
+		consecutivo := null;
+	END IF;		
+	raise notice 'consecutivo %',consecutivo;
+	
+	--return  consecutivo;
+END;
+$function$
+LANGUAGE 'plpgsql';
+
+drop function agregar_pago_alumno(text,text, text, text,integer,numeric, text,  integer, text, text, integer)
+
+
+CREATE OR REPLACE FUNCTION public.agregar_pago_alumno(ids_cargos text, cargos_desglose text, ids_cargos_descuento text, id_descuentos_desglose text, id_alumno integer, pago_param numeric, nota text, forma_pago_param integer, identificador_factura_param text, identificador_pago_param text,id_sucursal integer, id_genero integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+	fecha_current timestamp;
+	ids_cargos_relacionar integer[];
+	ids_cargos_descuento_aplicar integer[];
+	ids_descuentos_array integer[];	
+	cargos_desglose_relacionar numeric[];
+	id_pago_balance_alumno integer;
+	alumno_record RECORD;	
+	retorno integer := 0;
+	sqlerr_message_text TEXT;
+	sqlerr_exception_detail TEXT;
+	sqlerr_exception_hint TEXT;	
+	ind int := 0;
+	consecutivo_record co_consecutivo%ROWTYPE;	
+	folio text := null;
+	sqlInsertPago TEXT := 'INSERT INTO co_pago_balance_alumno(CO_ALUMNO,FECHA,PAGO,NOTA,GENERO)
+							VALUES($1,$2,$3,$4,$5) RETURNING id INTO id_pago';	
+							
+	sqlInsertRelacion TEXT := 'INSERT INTO co_pago_cargo_balance_alumno(fecha,co_pago_balance_alumno,co_cargo_balance_alumno,pago,co_sucursal,genero)
+							VALUES($1,$2,$3,$4,$5,$6)';		
+							
+
+BEGIN    
+
+	raise notice 'REGISTRAR PAGOS';	
+	
+	 ids_cargos_relacionar = string_to_array(ids_cargos,','); 
+	 cargos_desglose_relacionar =  string_to_array(cargos_desglose,',');
+
+	 ids_cargos_descuento_aplicar = string_to_array(ids_cargos_descuento,',');
+	 ids_descuentos_array = string_to_array(id_descuentos_desglose,',');	 	 
+	 
+	 raise notice 'cargos a relacionar %',ids_cargos_relacionar;
+	 raise notice 'cargos desglose a relacionar %',cargos_desglose_relacionar;
+	 raise notice 'ids cargos a aplicar %',ids_cargos_descuento_aplicar ;
+	 raise notice 'descuentos a aplicar %',ids_descuentos_array;
+	 
+	fecha_current := getDate('');	
+	select * from co_alumno where id = id_alumno INTO alumno_record;		
+	
+	raise notice 'pass 1';		
+	
+	
+	IF FOUND THEN				
+				fecha_current := ((getDate('')+getHora(''))::timestamp);							
+
+				--solicitar folio
+				select * from obtener_consecutivo('RECIBO_PAGO',id_sucursal) INTO consecutivo_record;
+
+				folio := (consecutivo_record.anio||'-'||consecutivo_record.valor::text);
+								
+				INSERT INTO co_pago_balance_alumno(folio,co_sucursal,CO_ALUMNO,FECHA,PAGO,NOTA,CO_FORMA_PAGO,IDENTIFICADOR_FACTURA,IDENTIFICADOR_PAGO,GENERO)
+							VALUES(folio,id_sucursal,alumno_record.ID,fecha_current,pago_param,nota,forma_pago_param,identificador_factura_param,identificador_pago_param, id_genero) 
+				RETURNING id INTO id_pago_balance_alumno;
+									
+				raise notice 'id_pago_balance insertartado %',id_pago_balance_alumno;
+				raise notice 'pass 2';			
+				
+			raise notice 'se registro el pago ';
+
+			raise notice 'aplicar descuentos a cargos ';
+
+			raise notice 'ids_cargos_descuento_aplicar %',ids_cargos_descuento_aplicar; 
+			
+			
+				FOR i IN 1 .. coalesce(array_upper(ids_cargos_descuento_aplicar, 1),1)
+				LOOP
+				raise notice 'ejecutando aplicar descuento alumno=% , cargo = %, descuentod id =%,genero =%'
+						,id_alumno,
+						ids_cargos_descuento_aplicar[i],
+						ids_descuentos_array[i],			
+						id_genero;
+						
+				PERFORM aplicar_descuento_cargo(	
+						id_alumno,
+						ids_cargos_descuento_aplicar[i],
+						ids_descuentos_array[i],			
+						id_genero);
+						
+				END LOOP;
+   			
+
+			raise notice 'relacionar ';
+			
+			FOR i IN 1 .. array_upper(ids_cargos_relacionar, 1)
+   			LOOP
+			  						
+      				RAISE NOTICE 'relacionando id_cargo % id_pago % cantidad %',ids_cargos_relacionar[i],id_pago_balance_alumno,cargos_desglose_relacionar[i];
+					EXECUTE sqlInsertRelacion 
+						USING fecha_current,
+								id_pago_balance_alumno,
+								ids_cargos_relacionar[i],
+								cargos_desglose_relacionar[i],		
+								id_sucursal,						
+								id_genero;		
+					raise notice 'guardado..';			
+		
+
+					UPDATE co_cargo_balance_alumno
+					SET TOTAL_PAGADO = (TOTAL_PAGADO + cargos_desglose_relacionar[i]),
+						TOTAL = (TOTAL - cargos_desglose_relacionar[i]),
+						pagado = ((TOTAL - cargos_desglose_relacionar[i]) = 0)						
+					WHERE id = ids_cargos_relacionar[i];		
+					raise notice 'total actualizado..';									
+					
+   			END LOOP;
+
+					update  co_alumno 			
+					SET total_adeudo = (
+					select sum(total) 
+					from co_cargo_balance_alumno 
+					where co_alumno = alumno_record.id 
+						and eliminado = false
+			)
+			where id = id_alumno;
+   			
+			
+	ELSE
+		raise notice 'NO EXISTE EL BALANCE';
+	
+	END IF;		
+	raise notice 'id_pago_balance_alumno %',id_pago_balance_alumno;
+	
+	return (select id_pago_balance_alumno);
+END;
+$function$

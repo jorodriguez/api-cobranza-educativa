@@ -1,0 +1,1085 @@
+select * from co_alumno where eliminado=false order by nombre asc
+
+INSERT INTO USUARIO(id,NOMBRE,CORREO,PASSWORD)
+VALUES(1,'TEST','test@gmail.com','$2a$08$XOjFNU1bEQ4YjNm0/jfvJO4CVbqYKy/DZV0B1QtWuwWFcnh2bmKOC');
+
+INSERT INTO CO_SUCURSAL(id,NOMBRE,DIRECCION,genero) VALUES(1,'SUC MTY','x',1);
+
+INSERT INTO CO_GRUPO(ID,NOMBRE,genero) VALUES(1,'Baby Magic',1),(2,'Mini Magic',1),(3,'Super Magic',1);
+
+INSERT INTO CO_PADRE(ID,NOMBRE,CORREO,password,GENERO) VALUES(1,'DEFAULT','dummy@gmail.com','',1);
+
+INSERT INTO CO_ALUMNO(co_sucursal,co_grupo,co_padre,
+					nombre,apellidos,fecha_nacimiento,
+					alergias,nota,hora_entrada,
+					hora_salida,costo_inscripcion,costo_colegiatura,
+					minutos_gracia,foto,fecha_reinscripcion,
+					genero)
+VALUES(1,1,1,'prueba','prueba','2017-01-01','ninguna','','08:00:00','02:00:00',
+	  		0,0,0,'',current_date+100,1);
+
+
+
+
+
+
+CREATE TABLE public.co_alumno
+(
+    id integer serial not null,
+    co_sucursal integer NOT NULL,
+    co_grupo integer NOT NULL,
+    co_padre integer NOT NULL,
+    nombre text,
+    apellidos text,
+    fecha_nacimiento date NOT NULL,
+    alergias text,
+    nota text,
+    hora_entrada time without time zone NOT NULL,
+    hora_salida time without time zone NOT NULL,
+    costo_inscripcion numeric NOT NULL,
+    costo_colegiatura numeric NOT NULL,
+    minutos_gracia integer DEFAULT 0,
+    foto text,
+    fecha_reinscripcion date,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_alumno_pkey PRIMARY KEY (id),
+    CONSTRAINT co_alumno_co_grupo_fkey FOREIGN KEY (co_grupo)
+        REFERENCES public.co_grupo (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT co_alumno_co_padre_fkey FOREIGN KEY (co_padre)
+        REFERENCES public.co_padre (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT co_alumno_co_sucursal_fkey FOREIGN KEY (co_sucursal)
+        REFERENCES public.co_sucursal (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT co_alumno_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT co_alumno_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES public.usuario (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+
+
+
+
+create table co_asistencia(
+	id serial not null primary key,
+	fecha date not null default current_date,	
+	co_alumno integer not null,
+	hora_entrada time not null default current_time,
+	hora_salida time,	
+	usuario integer,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+	 CONSTRAINT co_asistencia_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT co_asistencia_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES public.usuario (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+
+
+alter table usuario ADD COLUMN co_sucursal int;
+ALTER TABLE usuario ADD FOREIGN KEY (co_sucursal) REFERENCES co_sucursal(id);
+update usuario set co_sucursal = 1;	
+alter table usuario ALTER COLUMN co_sucursal SET NOT NULL;
+
+
+
+
+CREATE TABLE co_familiar
+(
+    id serial NOT NULL ,
+    nombre text NOT NULL,
+    correo character varying(60) NOT NULL,
+    password character varying(15) NOT NULL,
+    telefono text ,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_familiar_pkey PRIMARY KEY (id),
+    CONSTRAINT co_familiar_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT co_padre_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES public.usuario (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+
+alter table co_alumno drop column co_padre;
+alter table co_alumno add column padre integer;
+alter table co_alumno add column madre integer;
+
+alter table co_alumno drop column co_padre;
+--padre
+ALTER TABLE co_alumno ADD FOREIGN KEY (padre) REFERENCES co_familiar(id);
+ALTER TABLE co_alumno ADD FOREIGN KEY (madre) REFERENCES co_familiar(id);
+
+--
+ALTER TABLE co_alumno add column co_familiar_1 integer;
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_familiar_1) REFERENCES co_familiar(id);
+
+ALTER TABLE co_alumno add column co_familiar_2 integer;
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_familiar_1) REFERENCES co_familiar(id);
+
+ALTER TABLE co_alumno add column co_familiar_3 integer;
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_familiar_1) REFERENCES co_familiar(id);
+
+------CREAR PROCEDIMIENTO PARA ZONA HORARIA
+CREATE or replace FUNCTION getDate(IN zona text,OUT fecha date) AS $$
+BEGIN    
+	IF zona IS NULL OR zona = '' THEN
+		zona := 'America/Monterrey';	
+    	--select current_date at time zone 'America/Monterrey' INTO fecha;
+		select current_date at time zone zona INTO fecha;
+	END IF;
+END;
+$$ 
+LANGUAGE 'plpgsql';
+----------------
+
+
+// 
+
+
+create table cat_actividad(
+	id serial,
+	nombre text not null,
+	icono varchar(50) default 'no-icon-class',
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+	posicion int default 0,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_actividad_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_actividadgenero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id) MATCH SIMPLE,
+    CONSTRAINT cat_actividad_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id) MATCH SIMPLE        
+);
+
+
+create table cat_tipo_actividad(
+	id serial not null,	
+	cat_actividad integer not null,
+	nombre text not null,	
+	fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_tipo_actividad_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_tipo_actividad_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+    CONSTRAINT cat_tipo_actividad_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),
+	CONSTRAINT cat_tipo_actividad_actividad_fkey FOREIGN KEY (cat_actividad)
+        REFERENCES cat_actividad (id) 
+);
+
+create table cat_sub_actividad(
+	id serial not null,
+	cat_actividad integer not null,	
+	nombre text not null,	
+	fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_sub_actividad_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_sub_actividad_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+    CONSTRAINT cat_sub_actividad_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),
+	CONSTRAINT cat_sub_actividad_actividad_fkey FOREIGN KEY (cat_actividad)
+        REFERENCES cat_actividad (id) 
+);
+
+create table cat_registro_actividad(
+	id serial not null,
+	co_alumno integer not null,
+	cat_tipo_actividad integer not null,
+	cat_sub_actividad integer not null,
+	fecha date not null,	
+	hora time not null,		
+	nota text,
+	icono varchar(50) default 'no-icon-class',
+	url_foto text,	
+	tiene_tipo_actividad boolean default false,
+	fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_reg_actividad_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_reg_actividad_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+    CONSTRAINT cat_reg_actividad_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),
+	CONSTRAINT cat_reg_alumno_fkey FOREIGN KEY (co_alumno)
+        REFERENCES co_alumno (id),
+	CONSTRAINT cat_reg_tipo_actividad_fkey FOREIGN KEY (cat_tipo_actividad)
+        REFERENCES cat_tipo_actividad (id),
+	CONSTRAINT cat_reg_sub_actividad_fkey FOREIGN KEY (cat_sub_actividad)
+        REFERENCES cat_sub_actividad (id) 	
+);
+
+
+insert into cat_actividad(id,nombre,icono,posicion,genero)
+values(1,'Alimentación','fas fa-utensils',1,1),
+	   (2,'Medicamento','fas fa-prescription-bottle-alt',2,1),
+	   (3,'Siesta','fas fa-bed',3,1),
+	   (4,'Notas','fas fa-clipboard',4,1);
+
+insert into cat_tipo_actividad(cat_actividad,nombre,genero)
+values (1,'Biberón',1),
+		(1,'Desayuno',1),
+		(1,'Merienda Mañana',1),
+		(1,'Comida',1),
+		(1,'Merienda Tarde',1),
+		(1,'Cena',1);
+
+--tipos de actividades ALIMENTACION		
+insert into cat_sub_actividad(cat_actividad,nombre,genero)
+values (1,'Poco',1),(1,'Completo',1),(1,'Doble',1);
+
+--ADD  COLUMN PARA RELACIONAR CON CAT_ACTIVIDAD (tabla principal)
+alter table co_registro_Actividad add column cat_actividad integer not null;
+ALTER TABLE co_registro_Actividad ADD FOREIGN KEY (cat_actividad) REFERENCES cat_actividad(id);
+
+---eliminar not null en registro_Actividad
+alter table co_registro_actividad alter column cat_tipo_actividad drop not null;
+alter table co_registro_actividad alter column cat_sub_actividad drop not null;
+
+
+
+/******************************   FORMATO DE INSCRIPCION  ******************************/
+
+
+create table co_formato_inscripcion(
+	id serial not null,
+	co_alumno integer not null,
+    fecha_inscripcion date,
+	hermanos text,
+	estado_convivencia_padres text, --Viven,juntos,Separados,Viudo,Padre o madre solteros 
+	servicio_contratar text, -- Catalogo de servicios Estancia, Guarderia Kinder
+	horario_servicio text, -- Preguntar
+	direccion text,
+	resp_escuela_guarderia text,
+	resp_esperan_como_institucion text,
+	resp_circunstancia_especial_familia text,
+	resp_participacion_padres json,
+	estado_embarazo text,
+	resp_embarazo_planeado text,
+	gateo boolean,
+	edad_comienzo_caminar int,
+	edad_comienzo_esfinteres int,
+	edad_balbuceo int,
+	primer_palabra_con_significado text,
+	primeras_senas text,
+	enfermedades text,
+	 accidentes_graves text,
+	 dificultad_fisica json,
+	uso_aparato json,
+ tipo_terapia_especial text,
+ comportamiento_generales json,
+ duerme_con json,
+ resp_sieta boolean,
+ resp_horario_sieta boolean,
+ resp_promedio_horas_dueme text,
+resp_numero_comidas_dia text,
+ resp_horas_tv text,
+ resp_programas_favoritos text,
+ resp_actividades_fin_semana text,
+ resp_habilidades json,
+ informacion_adicional text,
+nota_celebracion_dia text,
+	fecha_genero timestamp without time zone default current_timestamp,
+	fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,    
+    CONSTRAINT co_formato_inscripcion_pkey PRIMARY KEY (id),
+    CONSTRAINT co_formato_inscripcion_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_formato_inscripcion_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)         
+);
+
+COMMENT ON COLUMN co_formato_inscripcion.resp_escuela_guarderia IS 'Respuesta a ¿Ha estado en alguna escuela o guardería?.';
+COMMENT ON COLUMN co_formato_inscripcion.resp_esperan_como_institucion IS 'Respuesta a ¿Qué esperan de nosotros como institución? .';
+COMMENT ON COLUMN co_formato_inscripcion.resp_circunstancia_especial_familia IS 'Respuesta a CIRCUNSTANCIAS ESPECIALES EN LA FAMILIA (en el último año) .';
+COMMENT ON COLUMN co_formato_inscripcion.resp_participacion_padres IS 'PARTICIPACIÓN DE LOS PADRES EN (diciplina,juegos alimentos,etc)';
+
+
+alter table co_alumno add column sexo varchar(15);
+alter table co_alumno add column nombre_carino text;
+alter table co_alumno add column co_formato_inscripcion int;
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_formato_inscripcion) REFERENCES co_formato_inscripcion(id);
+
+alter table co_alumno drop column co_familiar_1;
+alter table co_alumno drop column co_familiar_2;
+alter table co_alumno drop column co_familiar_3;
+alter table co_alumno drop column madre;
+alter table co_alumno drop column padre;
+
+drop table co_familiar;
+
+--parentesco / familiar
+create table co_parentesco(
+	id serial not null,
+	nombre text not null,
+	fecha_genero timestamp without time zone default current_timestamp,
+	fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,    
+    CONSTRAINT co_parentesco_pkey PRIMARY KEY (id),
+    CONSTRAINT co_parentesco_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_parentesco_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)         
+);
+
+create table co_familiar(
+	id serial not null,	
+	nombre text not null,
+	telefono text,
+	fecha_nacimiento date not null,
+	correo text,
+	password text,
+	celular text,
+	religion text,		
+	nota_celebracion_dia text,
+	fecha_genero timestamp without time zone default current_timestamp,
+	fecha_modifico timestamp without time zone,
+	genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,    
+    CONSTRAINT co_familiar_pkey PRIMARY KEY (id),
+    CONSTRAINT co_familiar_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_familiar_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)      
+);
+
+create table co_alumno_falimiar(
+	id serial not null,
+	co_alumno integer not null,
+	co_falimiar integer,
+	co_parentesco int not null,
+	autorizado_para_entrega boolean,
+	orden_autorizado_para_entrega int,
+	orden_aviso_emergencia int,
+	envio_avisos boolean,
+	envio_recibos boolean,	
+	fecha_genero timestamp without time zone default current_timestamp,
+	fecha_modifico timestamp without time zone,
+	genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,    
+    CONSTRAINT co_alumno_falimiar_pkey PRIMARY KEY (id),
+    CONSTRAINT co_alumno_falimiar_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_alumno_falimiar_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)
+);
+
+// insert parentesco
+insert into co_parentesco(id,nombre,genero)
+values(1,'Papá',1),(2,'Mamá',1),(3,'Abuelo',1),(4,'Abuela',1),(5,'Tío',1),(6,'Hermano',1);
+
+
+
+alter table co_formato_inscripcion ALTER COLUMN edad_comienzo_caminar TYPE text;
+alter table co_formato_inscripcion ALTER COLUMN edad_comienzo_esfinteres TYPE text;
+alter table co_formato_inscripcion ALTER COLUMN edad_balbuceo TYPE text;
+alter table co_formato_inscripcion ALTER COLUMN resp_horario_sieta TYPE text;
+
+--
+alter table co_alumno add column co_formato_inscripcion integer;
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_formato_inscripcion) REFERENCES co_formato_inscripcion(id);
+
+
+
+alter table co_formato_inscripcion alter column co_alumno drop not null;
+
+
+alter table co_alumno add column co_padre integer;
+alter table co_alumno add column co_madre integer;
+
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_padre) REFERENCES co_familiar(id);
+ALTER TABLE co_alumno ADD FOREIGN KEY (co_madre) REFERENCES co_familiar(id);
+
+ALTER TABLE co_alumno_falimiar RENAME TO co_alumno_familiar;
+
+
+alter table co_familiar alter column fecha_nacimiento drop not null
+
+ALTER TABLE co_alumno_familiar RENAME COLUMN co_falimiar TO co_familiar;
+
+alter table co_alumno_familiar alter column co_parentesco drop not null;
+
+alter table co_formato_inscripcion add column resp_motivo_inscripcion text;
+
+
+
+
+create table co_valor_esperado_empresa(
+	id serial not null,
+	concepto text not null,
+	descripcion text,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+       fecha_modifico timestamp without time zone,
+       genero integer NOT NULL,
+       modifico integer,
+       eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_valor_esperado_pkey PRIMARY KEY (id),        
+    CONSTRAINT co_valor_esperado_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+    CONSTRAINT co_alumno_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)         	
+);
+
+create table co_formato_valor_esperado_empresa(
+	id serial not null,
+	co_formato_inscripcion integer not null,	
+	co_valor_esperado_empresa integer not null,	
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+       fecha_modifico timestamp without time zone,
+       genero integer NOT NULL,
+       modifico integer,
+       eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_formato_valor_esperado_pkey PRIMARY KEY (id),        
+    CONSTRAINT co_formato_valor_esperado_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+    CONSTRAINT co_formato_valor_esperado_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),
+    CONSTRAINT co_formato_valor_esperado_empresa_fkey FOREIGN KEY (co_valor_esperado_empresa)
+        REFERENCES co_valor_esperado_empresa (id),
+    CONSTRAINT co_formato_inscripcion_empresa_fkey FOREIGN KEY (co_formato_inscripcion)
+        REFERENCES co_formato_inscripcion (id)               	
+);
+
+
+create table co_empresa(
+	id serial not null,
+	nombre text not null,
+	direccion text,
+	telefono text,
+	nombre_representante text,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+        fecha_modifico timestamp without time zone,
+        genero integer NOT NULL,
+        modifico integer,
+       eliminado boolean NOT NULL DEFAULT false,
+       CONSTRAINT co_empresa_pkey PRIMARY KEY (id),        
+       CONSTRAINT co_empresa_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+       CONSTRAINT co_empresa_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)         	
+);
+
+
+alter table co_familiar add column co_empresa integer;
+
+alter table co_familiar add FOREIGN KEY (co_empresa) REFERENCES co_empresa(id);
+
+create table co_servicio(
+	id serial not null,
+	nombre text not null,
+	descripcion text,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+        fecha_modifico timestamp without time zone,
+        genero integer NOT NULL,
+        modifico integer,
+       eliminado boolean NOT NULL DEFAULT false,
+       CONSTRAINT co_servicio_pkey PRIMARY KEY (id),        
+       CONSTRAINT co_servicio_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+       CONSTRAINT co_servicio_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)       
+	
+);
+
+
+alter table CO_FORMATO_INSCRIPCION add column co_servicio integer;
+
+alter table CO_FORMATO_INSCRIPCION add FOREIGN KEY (co_servicio) REFERENCES co_servicio(id);
+
+
+
+insert into co_valor_esperado_empresa(concepto,genero)
+values('Más información sobre cómo educar a mi hijo',1)
+	,('Que mi hijo sea más introvertido o extrovertido',1)
+	,('Que mi hijo logre tener valores establecidos',1)
+	,('Que mi hijo respete las normas',1);
+
+
+
+alter table co_parentesco add column sistema boolean default false;
+
+update co_parentesco set sistema = true, eliminado = false where id in (1,2);
+
+alter table co_familiar drop column co_empresa;
+
+alter table co_formato_inscripcion add column co_empresa integer;
+
+alter table CO_FORMATO_INSCRIPCION add FOREIGN KEY (co_empresa) REFERENCES co_empresa(id);
+
+
+	update co_alumno_familiar set autorizado_para_entrega = true,
+										  envio_avisos = false,
+											envio_recibos=false;
+			
+			alter table co_alumno_familiar alter column autorizado_para_entrega set not null;
+			alter table co_alumno_familiar alter column autorizado_para_entrega set default true;
+			
+			alter table co_alumno_familiar alter column envio_avisos set not null;
+			alter table co_alumno_familiar alter column envio_avisos set default false;
+			
+			alter table co_alumno_familiar alter column envio_recibos set not null;
+			alter table co_alumno_familiar alter column envio_recibos set default false;
+			
+			
+			
+			
+			ALTER TABLE co_servicio  RENAME TO cat_servicio;
+
+	alter table cat_servicio add column precio numeric not null default 0;
+
+
+    alter table cat_servicio add column hora_extra numeric not null default 0;
+
+    	
+			insert into cat_Servicio(nombre,descripcion,precio,genero)
+			values('Guardería','',0,1),
+				  ('Estancia Vespertina','',0,1),
+				  ('Kinder I','',0,1),
+				  ('Kinder II','',0,1),
+				  ('Curso de Verano','',0,1),
+				  ('Pascuatón (Senana Santa)','',0,1);
+			
+
+
+CREATE TABLE cat_valores_institucion
+(
+    id serial NOT NULL,
+    nombre text,    
+	activo boolean default true,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    posicion integer DEFAULT 0,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_valores_inst_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_valores_inst_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES public.usuario (id),        
+    CONSTRAINT cat_valores_inst_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id)        
+);
+
+
+CREATE TABLE cat_formato_valores_institucion
+(
+    id serial NOT NULL ,
+	co_formato_inscripcion integer not null,
+	cat_valores_institucion integer not null,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    posicion integer DEFAULT 0,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_for_valores_inst_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_for_valores_inst_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES public.usuario (id),        
+    CONSTRAINT cat_for_valores_inst_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),
+	CONSTRAINT cat_for_valores_inst_formao_fkey FOREIGN KEY (co_formato_inscripcion)
+        REFERENCES co_formato_inscripcion (id),
+	CONSTRAINT cat_for_valores_inst_valores_fkey FOREIGN KEY (cat_valores_institucion)
+        REFERENCES cat_valores_institucion(id)
+	
+);
+
+
+
+CREATE TABLE co_alumno_servicio
+(
+    id serial not null,
+    fecha date not null,	
+	co_alumno integer not null,
+	cat_servicio integer not null,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    posicion integer DEFAULT 0,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_alumno_servicio_pkey PRIMARY KEY (id),
+    CONSTRAINT co_alumno_servicio_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES public.usuario (id),    
+    CONSTRAINT co_alumno_servicio_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),        
+	CONSTRAINT co_alumno_servicio_alumno_fkey FOREIGN KEY (co_alumno)
+        REFERENCES co_alumno (id),        	
+	CONSTRAINT co_alumno_servicio_servicio_fkey FOREIGN KEY (cat_servicio)
+        REFERENCES cat_servicio (id)
+)
+
+
+alter table co_alumno_servicio drop column posicion
+
+alter table co_alumno_servicio add column cantidad integer not null default 1;
+
+
+
+ALTER TABLE co_alumno_servicio RENAME TO co_alumno_producto ;
+
+ALTER TABLE cat_servicio RENAME TO cat_producto ;
+
+
+
+create table cat_servicio(
+	id serial not null,
+	nombre text not null,	
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+        fecha_modifico timestamp without time zone,
+        genero integer NOT NULL,
+        modifico integer,
+       eliminado boolean NOT NULL DEFAULT false,
+       CONSTRAINT cat_servicio_pkey PRIMARY KEY (id),        
+       CONSTRAINT cat_servicio_genero_fkey FOREIGN KEY (genero)
+        REFERENCES usuario (id),
+       CONSTRAINT car_servicio_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id)       
+	
+);
+
+
+
+alter table  co_formato_inscripcion add column cat_servicio integer;
+
+alter table co_formato_valor_esperado_empresa add column seleccionado boolean not null default false;
+
+
+
+
+
+
+
+CREATE TABLE cat_tipo_cargo
+(
+    id serial not null,
+    nombre text not null,	
+	afectacion text not null,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT cat_tipo_cargo_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_tipo_cargo_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT cat_tipo_cargo_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id)        
+);
+
+
+
+
+
+CREATE TABLE cat_cargo
+(
+    id serial not null,
+	cat_tipo_cargo integer not null,
+    nombre text not null,
+	descripcion text not null,
+	precio numeric not null default 1,
+	notificar boolean default true,	
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,	
+    CONSTRAINT cat_cargo_pkey PRIMARY KEY (id),
+    CONSTRAINT cat_cargo_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),
+    CONSTRAINT cat_cargo_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),
+	CONSTRAINT cat_cargo_tipo_cargo_fkey FOREIGN KEY (cat_tipo_cargo)
+        REFERENCES cat_tipo_cargo (id)
+);
+
+
+-- set valor de sequence 
+ 
+CREATE TABLE co_periodo
+(
+    id serial not null,	
+    nombre text not null,	
+	fecha_inicio date not null,
+	fecha_fin date not null,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_periodo_pkey PRIMARY KEY (id),
+    CONSTRAINT co_periodo_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_periodo_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id)        
+);
+
+CREATE TABLE co_balance_alumno
+(
+    id serial not null,
+	co_alumno integer not null,
+	co_periodo integer not null,
+	total numeric default 0,
+	pagado boolean default false,
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_balance_alumno_pkey PRIMARY KEY (id),
+    CONSTRAINT co_balance_alumno_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_balance_alumno_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),
+	CONSTRAINT co_balance_alumno_alumno_fkey FOREIGN KEY (co_alumno)
+        REFERENCES co_alumno (id),
+	CONSTRAINT co_balance_alumno_periodo_fkey FOREIGN KEY (co_periodo)
+        REFERENCES co_periodo (id)        
+	
+);
+
+CREATE or replace FUNCTION getTimestamp(IN zona text,OUT fecha date) AS $$
+BEGIN    
+	IF zona IS NULL OR zona = '' THEN
+		zona := 'America/Monterrey';	    	
+		select current_timestamp at time zone zona INTO fecha;		 
+	END IF;
+END;
+$$ 
+LANGUAGE 'plpgsql';
+
+CREATE TABLE co_detalle_balance_alumno
+(
+    id serial not null,
+	co_balance_alumno integer not null,
+	cat_cargo integer not null,
+	fecha timestamp not null,	
+	cantidad int not null default 1 CHECK (cantidad > 0),
+	cargo numeric not null default 1 CHECK (cargo > 0),
+	total numeric not null default 1 CHECK (total > 0),
+    fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_det_balance_alumno_pkey PRIMARY KEY (id),
+    CONSTRAINT co_det_balance_alumno_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_det_balance_alumno_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),
+	CONSTRAINT co_det_balance_alumno_alumno_fkey FOREIGN KEY (co_balance_alumno)
+        REFERENCES co_balance_alumno (id),
+	CONSTRAINT co_det_balance_alumno_periodo_fkey FOREIGN KEY (cat_cargo)
+        REFERENCES cat_cargo (id)        
+);
+
+
+alter table cat_cargo add column sistema boolean not null default false;
+
+insert into cat_tipo_cargo(id,nombre,afectacion,genero)
+values (1,'CARGO','-',1), (2,'ABONO','+',1);
+
+
+insert into cat_cargo(id,cat_tipo_cargo,nombre,descripcion,precio,sistema,genero)
+values(1,1,'Mensualidad','Mensualidad.',1,true,1),
+		(2,1,'Cargo extra','Cargo por pago a destiempo de mensualidad. ',200,true,1),
+	  	(3,1,'Hora Extra','Cargo por hora extra.',100,true,1);
+	  
+
+ALTER SEQUENCE cat_cargo_id_seq RESTART WITH 1000;
+
+
+ alter table co_periodo rename to co_balance_mensual 
+ 
+ALTER TABLE co_balance_alumno RENAME COLUMN co_periodo TO co_balance_mensual;
+
+
+	alter table co_balance_mensual add column numero_anio int not null;
+	alter table co_balance_mensual add column numero_mes int not null;
+
+
+ALTER TABLE co_balance_mensual ADD CONSTRAINT unique_balance_mensual_month UNIQUE (co_alumno,co_balance_mensual);
+
+ALTER TABLE co_balance_mensual ADD CONSTRAINT unique_balance_mensual_month UNIQUE (numero_anio,numero_mes);
+
+
+CREATE or replace FUNCTION getDate(IN zona text,OUT fecha date) AS $$
+BEGIN    
+	IF zona IS NULL OR zona = '' THEN
+		zona := 'America/Monterrey';	
+    	--select current_date at time zone 'America/Monterrey' INTO fecha;
+		--select current_date at time zone zona INTO fecha;
+		select current_date INTO fecha;
+	END IF;
+END;
+$$ 
+LANGUAGE 'plpgsql';
+
+
+
+alter table co_balance_alumno drop column co_balance_mensual;
+drop table co_balance_mensual;
+
+
+
+alter table co_balance_alumno add column fecha_inicio date not null;
+alter table co_balance_alumno add column fecha_fin date not null;
+alter table co_balance_alumno add column anio integer not null;
+alter table co_balance_alumno add column mes integer not null;
+alter table co_balance_alumno add column nombre_mes text not null;
+
+
+drop function iniciar_balance_mensual;
+
+ALTER TABLE co_balance_alumno ADD CONSTRAINT unique_balance_mensual_alumno UNIQUE (co_alumno,anio,mes);
+
+
+
+alter table CO_DETALLE_BALANCE_ALUMNO add column nota text;
+
+
+ALTER TABLE co_balance_alumno ADD COLUMN TOTAL_ADEUDO NUMERIC NOT NULL DEFAULT 0; 
+		ALTER TABLE co_balance_alumno ADD COLUMN TOTAL_PAGOS NUMERIC NOT NULL DEFAULT 0; 
+		ALTER TABLE co_balance_alumno ADD COLUMN TOTAL_CARGOS NUMERIC NOT NULL DEFAULT 0; 
+
+
+alter table co_detalle_balance_alumno add column pagado boolean not null default false ;
+
+
+
+----------------
+
+CREATE TABLE co_pago_cargo_balance_alumno
+(
+    id serial not null,
+	fecha timestamp not null,	
+	co_pago_balance_alumno integer not null,
+	co_cargo_balance_alumno integer not null,	
+	pago numeric not null,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_pag_carg_balance_alumno_pkey PRIMARY KEY (id),
+    CONSTRAINT co_pag_cargbalance_alumno_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_pag_cargbalance_alumno_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),
+	CONSTRAINT co_pag_carg_balance_alumno_pago_fkey FOREIGN KEY (co_pago_balance_alumno)
+        REFERENCES co_pago_balance_alumno (id),
+	CONSTRAINT co_pag_carg_balance_alumno_cargo_fkey FOREIGN KEY (co_cargo_balance_alumno)
+        REFERENCES co_cargo_balance_alumno (id)	
+);
+
+
+
+
+--							alter table co_pago_cargo_balance_alumno add column pago numeric not null;
+
+
+
+alter table co_cargo_balance_alumno drop constraint co_detalle_balance_alumno_cantidad_check;
+alter table co_cargo_balance_alumno drop constraint co_detalle_balance_alumno_cargo_check;
+alter table co_cargo_balance_alumno drop constraint co_detalle_balance_alumno_total_check;
+
+alter table co_cargo_balance_alumno add CONSTRAINT co_detalle_balance_alumno_cantidad_check CHECK (cantidad >= 1);
+    alter table co_cargo_balance_alumno add CONSTRAINT co_detalle_balance_alumno_cargo_check CHECK (cargo >= 0::numeric);
+    alter table co_cargo_balance_alumno add CONSTRAINT co_detalle_balance_alumno_total_check CHECK (total >= 0::numeric);
+
+
+
+
+delete from cat_cargo;
+
+insert into cat_cargo(id,nombre,descripcion,precio,sistema,genero)
+values(1,'Mensualidad','Mensualidad.',1,true,1),
+	    (2,'Inscripción','Inscripción.',1,true,1),
+		(3,'Hora Extra','Cargo por hora extra.',100,true,1),
+		(4,'Cargo extra','Cargo por pago a destiempo de mensualidad. ',200,true,1);
+	  	
+---
+
+/*
+WITH asistencias AS(
+	select id as id_asistencia,
+			co_alumno,
+			fecha as fecha_entrada_asistencia,
+		    hora_entrada as hora_entrada_asistencia ,
+			hora_salida	
+	from co_asistencia 	
+	where fecha = getDate('') or hora_salida is null and eliminado = false	
+) select  
+		al.hora_salida,
+		(al.hora_salida + interval  '1 minute' * al.minutos_gracia) as hora_salida_limite,		
+		al.minutos_gracia,
+		getHora(''),
+		(al.hora_salida + interval  '1 minute' * al.minutos_gracia) < getHora(''),
+		age((getDate('') + getHora(''))::timestamp, (getDate('') +  (al.hora_salida + interval  '1 minute' * al.minutos_gracia))::timestamp ) as diferencia,
+		* 
+from co_alumno al inner join asistencias asis on al.id = asis.co_alumno
+where al.eliminado = false 
+order by diferencia desc
+
+
+
+*/
+
+CREATE TABLE co_hora_extra
+(
+    id serial not null,
+	co_asistencia integer not null,
+	fecha timestamp not null,		
+	hora_inicio timestamp,
+	hora_fin timestamp,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_hora_extra_pkey PRIMARY KEY (id),
+    CONSTRAINT co_hora_extra_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_hora_extra_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),
+	CONSTRAINT co_hora_extra_fkey FOREIGN KEY (co_asistencia)
+        REFERENCES co_asistencia (id)
+);
+
+
+
+CREATE TABLE si_notificacion
+(
+    id serial not null,
+	fecha timestamp not null,		
+	titulo text not null,		
+	cuerpo text not null,
+	icon text,
+	token text not null,
+	notificado boolean not null default false,	
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT si_notificacion_pkey PRIMARY KEY (id),
+    CONSTRAINT si_notificacion_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT si_notificacion_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id)	
+);
+
+
+
+alter table co_familiar add column token text;
+
+alter table si_notificacion add column fallo boolean default false;	
+ alter table si_notificacion add column mensaje_fallo text;		
+
+ alter table si_notificacion add column mensajeId text
+
+
+
+
+
+
+					
+CREATE TABLE co_tema_notificacion
+(
+    id serial not null,	
+	nombre text not null,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_tema_notificacion_pkey PRIMARY KEY (id),
+    CONSTRAINT co_tema_notificacion_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_tema_notificacion_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id)
+);
+			
+			
+CREATE TABLE co_usuario_notificacion
+(
+    id serial not null,	
+	usuario integer not null,
+	co_tema_notificacion integer not null,	
+	co_sucursal integer not null,
+	fecha_genero timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    fecha_modifico timestamp without time zone,    
+    genero integer NOT NULL,
+    modifico integer,
+    eliminado boolean NOT NULL DEFAULT false,
+    CONSTRAINT co_usuario_notificacion_pkey PRIMARY KEY (id),
+    CONSTRAINT co_usuario_notificacion_modifico_fkey FOREIGN KEY (modifico)
+        REFERENCES usuario (id),        
+    CONSTRAINT co_usuario_notificacion_genero_fkey FOREIGN KEY (genero)
+        REFERENCES public.usuario (id),	
+	CONSTRAINT co_usuario_notificacion_usuario_fkey FOREIGN KEY (usuario)
+        REFERENCES public.usuario (id),	
+	CONSTRAINT co_usuario_notificacion_tema_fkey FOREIGN KEY (co_tema_notificacion)
+        REFERENCES public.co_tema_notificacion (id),	
+	CONSTRAINT co_usuario_notificacion_sucursal_fkey FOREIGN KEY (co_sucursal)
+        REFERENCES co_sucursal (id)
+);
+
+
+		insert into co_tema_notificacion(id,nombre,genero) 
+		values(1,'TODAS LAS NOTIFICACIONES',1),(2,'PAGOS DE ALUMNOS',1),(3,'SALIDA DE ALUMNOS',1);;
+		
+			
+			INSERT INTO CO_USUARIO_NOTIFICACION(usuario,co_tema_notificacion,co_sucursal,genero)
+		values(10,1,1,1),(10,2,1,1),(10,3,1,1);
+	
+
+
+
+alter table co_hora_extra add column co_alumno integer not null;
+alter table co_hora_extra add FOREIGN KEY (co_alumno) REFERENCES co_alumno(id);
+
+
+INSERT INTO co_forma_pago(NOMBRE,GENERO)
+VALUES('EFECTIVO',1),('TRANSFERENCIA',1),('DEPÓSITO',1),('TARJETA',1);
