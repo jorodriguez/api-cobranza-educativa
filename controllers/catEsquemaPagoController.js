@@ -6,7 +6,7 @@ const getEsquemaPago = async(request, response) => {
     console.log("@getEsquemaPago");
     try {
 
-        const results = await catEsquemaPagoService.getEsquemaPago
+        const results = await catEsquemaPagoService.getEsquemaPago();
 
         response.status(200).json(results);
 

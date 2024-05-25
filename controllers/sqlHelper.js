@@ -10,6 +10,7 @@ const QUERY = {
     SERVICIOS: "SELECT * FROM cat_servicio WHERE CO_EMPRESA = $1 AND ELIMINADO = false order by nombre",
     CARGOS: "SELECT * FROM CAT_CARGO WHERE ELIMINADO = false order by nombre",
     //SUCURSALES: "SELECT id,nombre,direccion,class_color FROM CO_SUCURSAL WHERE ELIMINADO = false ",
+    CAT_ESQUEMA_PAGO: "SELECT * FROM CAT_ESQUEMA_PAGO WHERE ELIMINADO = FALSE",
     TEMPLATE_EMPRESA : `
     select em.nombre as nombre_empresa,
             em.direccion as direccion_empresa,

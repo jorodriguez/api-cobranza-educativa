@@ -17,7 +17,7 @@ const crearUsuarioConCorreo = async (usuarioData) => {
         
     if(busquedaCorreo.encontrado){
 
-        return new MensajeRetorno(false, "El correo ya se encuentra registrado", null);
+        return new MensajeRetorno(0,false, "El correo ya se encuentra registrado", null);
 
     }
 
@@ -33,7 +33,7 @@ const crearUsuarioConCorreo = async (usuarioData) => {
 
     await enviarCorreoRegistroUsuario({ id_usuario: usuarioId,clave:passwordData.password, genero : usuarioData.genero });
 
-    return new MensajeRetorno(true, "Se registró el usuario", null);
+   return new MensajeRetorno(usuarioId,true, "Se registró el usuario", null);
       
 }
 
@@ -178,5 +178,6 @@ module.exports = {
     desactivarUsuarioReporte,
     reiniciarClave,
     bloquearAccesoSistema,
-    getUsuariosAsesoresPorSucursal: usuarioDao.getUsuariosAsesoresPorSucursal
+    getUsuariosAsesoresPorSucursal: usuarioDao.getUsuariosAsesoresPorSucursal,
+    getUsuariosDocentesPorSucursal: usuarioDao.getUsuariosDocentesPorSucursal
 };

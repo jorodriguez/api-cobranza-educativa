@@ -13,7 +13,7 @@ const getEsquemaPago = async() => {
       select *
       from cat_esquema_pago
       where eliminado = false      
-      `, [idEmpresa]
+      `, []
     );
 };
 

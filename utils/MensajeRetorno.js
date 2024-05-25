@@ -26,9 +26,11 @@ class Mensaje{
 }
 
 class MensajeRetorno extends Mensaje{
-    constructor(estatus,mensaje,excepcion){
+
+    constructor(id,estatus,mensaje,excepcion){
         super(estatus,mensaje,null,excepcion);
         super.meta = null;        
+        this.id = id;
     }
 
     toJson(){

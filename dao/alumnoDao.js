@@ -200,10 +200,8 @@ SELECT
     i.confirmado,
     to_char(i.fecha_confirmado,'DD-MM-YYYY') as fecha_confirmado,    
     (select nombre from usuario where id = i.usuario_confirmo) as usuario_confirmo,
-    s.nombre as nombre_sucursal,
-    esp.id as id_especialidad,             	     
-    esp.nombre as especialidad,             	     
-    esp.color,             	     
+    s.nombre as nombre_sucursal,    
+    curso.nombre as especialidad,             	     
     (select string_agg(nombre,'-') from cat_dia where id = ANY(curso.dias_array::int[])) as dias, 
     curso.uid as uid_curso,
     to_char(curso.fecha_inicio_previsto,'DD-MM-YYYY') as fecha_inicio_previsto,    
@@ -226,8 +224,7 @@ SELECT
 FROM co_inscripcion i inner join co_alumno a on a.id = i.co_alumno
              inner join cat_genero genero on genero.id = a.cat_genero
              inner join co_sucursal s on i.co_sucursal = s.id             				
-             inner join co_curso curso on curso.id = i.co_curso             					             					
-             inner join cat_especialidad esp on esp.id = curso.cat_especialidad                         
+             inner join co_curso curso on curso.id = i.co_curso             					             					             
             inner join usuario dio_baja on dio_baja.id = a.dio_baja
     WHERE 1 = 1
           ${criterio ? ' AND '+criterio : ''}        

@@ -6,11 +6,10 @@ const cursoSemanasService = require('../services/cursoSemanasService');
 
 const getCursosActivosInscripcionesAbiertas = async (request, response) => {
     console.log("@getCursosActivosInscripcionesAbiertas");
-    try {
-        
-        const { id_sucursal,id_especialidad } = request.params;
-        console.log(" id_sucursal,id_especialidad",id_sucursal+"  "+id_especialidad);
-        const results = await cursoService.getCursosActivosInscripcionesAbiertas(id_sucursal,id_especialidad)        
+    try {        
+        const { id_sucursal } = request.params;
+        console.log(" id_sucursal,",id_sucursal);
+        const results = await cursoService.getCursosActivosInscripcionesAbiertas(id_sucursal);        
         response.status(200).json(results);       
        
     } catch (e) {
@@ -106,19 +105,11 @@ const createCurso = async (request, response) => {
     console.log("@createCurso");
     try {
         
-        const cursoData = {  
-            cat_especialidad,
-            dias_array,
-            //cat_horario,
-            hora_inicio,
-            hora_fin,
+        const cursoData = {              
             co_empresa,
-            co_sucursal,
-            costo_colegiatura_base,
-            costo_inscripcion_base,
-            nota,
-            fecha_inicio_previsto,
-            fecha_fin_previsto,      
+            nombre,
+            co_sucursal,            
+            nota,            
             genero } = request.body;
         
         const results = await cursoService.createCurso(cursoData);

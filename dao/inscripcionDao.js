@@ -170,8 +170,7 @@ const getQueryBase = (criterio) => `
   select i.id as id_inscripcion,
     curso.id as id_curso,
     curso.uid as uid_curso,
-    curso.semana_actual,	  
-    esp.duracion as duracion_curso,
+    curso.semana_actual,	      
     curso.fecha_inicio_previsto,  
     to_char(curso.fecha_inicio_previsto,'DD-MM-YYYY') as fecha_inicio_previsto,
     to_char(curso.fecha_inicio_previsto,'DD Mon YY') as fecha_inicio_previsto_format,          
@@ -182,16 +181,14 @@ const getQueryBase = (criterio) => `
     to_char(curso.fecha_fin,'DD-MM-YYYY') as fecha_fin,
     to_char(curso.fecha_fin,'DD Mon YY') as fecha_fin_format,          
     to_char(i.fecha_genero,'DD Mon YY HH24:MI') as fecha_inscripcion_format,          
-    dia.nombre as dias,
+    ' dias' as dias,
     i.costo_colegiatura,
     i.costo_inscripcion,
     i.nota as nota_inscripcion,
     i.total_pagado,
-    i.pagado,
-    esp.id as id_especialidad,
-    esp.foto as logo_taller,
-    esp.nombre as especialidad,
-    esp.color as color_especialidad,     
+    i.pagado,        
+    curso.nombre as especialidad,
+    'red' as color_especialidad,     
     to_char(curso.hora_inicio,'HH24:MI')||' - '||to_char(curso.hora_fin,'HH24:MI') as horario,
     a.id as id_alumno,
     a.nombre as alumno,
@@ -215,9 +212,7 @@ const getQueryBase = (criterio) => `
     esquema.id as cat_esquema_pago,
     esquema.nombre as esquema_pago,    
     i.genero
-from co_inscripcion i inner join co_curso curso on curso.id = i.co_curso
-    inner join cat_especialidad esp on esp.id = curso.cat_especialidad    
-    inner join cat_dia dia on dia.id = curso.cat_dia
+from co_inscripcion i inner join co_curso curso on curso.id = i.co_curso        
     inner join co_alumno a on a.id = i.co_alumno
     inner join co_sucursal suc on suc.id = i.co_sucursal
     inner join usuario usuario_genero on usuario_genero.id = i.genero

@@ -27,13 +27,19 @@ const getUsuarioPorSucursal = (idSucursal) => {
     return genericDao.findAll(getQueryBase(""), [idSucursal]);
 };
 
-
-
 const getUsuariosAsesoresPorSucursal = (idSucursal) => {
     const ROL_ASESOR = 4;
     return genericDao.findAll(
                         getQueryBase(` AND u.id in (select usuario from si_usuario_sucursal_rol where si_rol = $2 and co_sucursal = $1 and eliminado = false)`)
                         , [idSucursal,ROL_ASESOR]);
+};
+
+
+const getUsuariosDocentesPorSucursal = (idSucursal) => {
+    const ROL_DOCENTE = 9;
+    return genericDao.findAll(
+                        getQueryBase(` AND u.id in (select usuario from si_usuario_sucursal_rol where si_rol = $2 and co_sucursal = $1 and eliminado = false)`)
+                        , [idSucursal,ROL_DOCENTE]);
 };
 
 const insertarUsuario = async (usuarioData) => {
@@ -243,5 +249,6 @@ module.exports = {
     , updateClave
     , modificarAccesoSistema
     , getUsuariosAsesoresPorSucursal
+    , getUsuariosDocentesPorSucursal
 };
 

@@ -1,13 +1,14 @@
 
 const usuarioService = require('../services/usuarioService');
+const siUsuarioSucursalRolService = require('../services/siUsuarioSucursalRolService');
 const handle = require('../helpers/handlersErrors');
 const { MensajeRetorno } = require('../utils/MensajeRetorno');
 
-const crearUsuario = (request, response) => {
+const crearUsuario = async (request, response) => {
 	console.log("@@crearUsuario");
 	try {
 
-		const usuarioData = { alias,nombre,cat_tipo_usuario, correo, co_sucursal,co_empresa, hora_entrada, hora_salida,sueldo_mensual, genero } = request.body;
+		const usuarioData = { alias,nombre,cat_tipo_usuario, correo, co_sucursal,co_empresa, hora_entrada, hora_salida,sueldo_mensual, rol,genero } = request.body;
 
 		let proceso = null;		
 
@@ -18,17 +19,33 @@ const crearUsuario = (request, response) => {
 		
 		console.log("USUARIO CON CORREO " + usuarioData.correo);
 		
-		proceso = usuarioService.crearUsuarioConCorreo(usuarioData);
+		const result = await usuarioService.crearUsuarioConCorreo(usuarioData);
 
+		if(rol){				
+			await siUsuarioSucursalRolService
+							.actualizarRol(
+								{seleccionado:true,
+								 siRol:rol,
+								 siUsuario:result.id,
+								 coSucursal:co_sucursal,
+								 coEmpresa:co_empresa,
+								 idUsuarioGenero:genero
+						});
+		}
+
+		response.status(200).json(result);
+
+/*
 		proceso.then(result => {
-    		console.log("nuevo usuario registrado " + JSON.stringify(result));
+    		console.log("nuevo usuario registrado " + JSON.stringify(result));			
+			// registro del rol
+			
 			response.status(200).json(result);
 
 		}).catch(error => {
 			console.error("error:"+error);
 			handle.callbackError(error, response);
-		});
-
+		});*/
 	} catch (e) {
 		console.error("error no controlado"+e);
 		handle.callbackErrorNoControlado(e, response);
@@ -157,6 +174,22 @@ const getAsesoresPorSucursal = async (request, response) => {
 };
 
 
+const getDocentesPorSucursal = async (request, response) => {
+
+	try {
+		const idSucursal = request.params.id_sucursal;
+		
+		const results = await usuarioService.getUsuariosDocentesPorSucursal(idSucursal);
+		
+		response.status(200).json(results);
+
+	} catch (e) {
+		console.error(e);
+		handle.callbackErrorNoControlado(e, response);
+	}
+};
+
+
 const buscarUsuarioPorId = (request, response) => {
 
 	try {
@@ -261,5 +294,6 @@ module.exports = {
 	desactivarUsuarioReporte,
 	reiniciarClave,
 	bloquearAccesoSistema,
-	getAsesoresPorSucursal
+	getAsesoresPorSucursal,
+	getDocentesPorSucursal
 };

@@ -16,12 +16,18 @@ const getCatGeneroAlumno = (request, response) => {
     getCatalogo(QUERY.CAT_GENERO_ALUMNO,response);
 };
 
+// esquema pago
+const getCatEsquemaPago = (request, response) => {
+    console.log("@getCatEsquemaPago");       
+    getCatalogo(QUERY.CAT_GENERO_ALUMNO,response);
+};
 
 
 module.exports = {
     getCatalogo,
     getFormasPago,
     getCatGeneroFamiliar,    
-    getCatGeneroAlumno,    
+    getCatGeneroAlumno,   
+    getCatEsquemaPago 
   
 }
