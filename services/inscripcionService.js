@@ -13,7 +13,7 @@ const guardarInscripcion = async(inscripcionData) => {
 
     const idInscripcion = await inscripcionDao.guardarInscripcion(idAlumno, inscripcion);
 
-    await cargoService.registrarInscripcion(co_curso, idAlumno, genero);
+//    await cargoService.registrarInscripcion(co_curso, idAlumno, genero);
 
     const alumno = await alumnoDao.getAlumnoPorId(idAlumno);
 

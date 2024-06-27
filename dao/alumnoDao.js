@@ -120,7 +120,30 @@ const modificarFotoPerfil = async (idAlumno, metadaFoto, genero) => {
 
 const getAlumnoPorUId = (uidAlumno) => {
     console.log("@getAlumnoPorUId "+uidAlumno);
-    return genericDao.findOne(`select  to_char(fecha_nacimiento,'mm-dd')=to_char(getDate(''),'mm-dd') as is_cumpleanos,* from co_alumno where uid = $1 and eliminado = false;`, [uidAlumno]);
+    return genericDao.findOne(`
+    select 
+        i.id,
+        c.id as id_curso,
+        c.nombre as nombre_curso, 
+        a.id as id_alumno,
+        a.nombre as nombre,
+        d.id as id_docente,
+        to_char(a.fecha_nacimiento,'DD') as dia_nacimiento,
+        to_char(a.fecha_nacimiento,'MM') as mes_nacimiento,
+        to_char(a.fecha_nacimiento,'YYYY') as anio_nacimiento,
+        a.tutor,
+        a.correo,
+        a.telefono,
+        esquema.id as cat_esquema_pago,
+        i.costo_colegiatura,
+        i.dia_pago,
+        i.banco,
+        i.nota
+    from co_inscripcion i inner join co_curso c on c.id = i.co_curso
+                      inner join co_alumno a on a.id = i.co_alumno
+                      inner join usuario d on d.id = i.docente
+                      inner join cat_esquema_pago esquema on esquema.id = i.cat_esquema_pago
+    where i.uid = $1 and i.eliminado = false and a.eliminado = false`, [uidAlumno]);
 };
 
 const getAlumnoPorId = (idAlumno) => {

@@ -8,12 +8,12 @@ const { isEmptyOrNull } = require("../utils/Utils");
 
 const guardarInscripcion = async(idAlumno, inscripcionData) => {
     console.log("@guardarInscripcion");
-    const { co_curso, co_empresa, co_sucursal, co_alumno, cat_esquema_pago, costo_colegiatura, costo_inscripcion, nota, usuario_inscribe, genero } = inscripcionData;
+    const { co_curso, co_empresa, co_sucursal, co_alumno, cat_esquema_pago, costo_colegiatura, costo_inscripcion, nota, usuario_inscribe,id_docente,dia_pago,banco,  genero } = inscripcionData;
 
     return genericDao.execute(`
-          INSERT INTO CO_INSCRIPCION(co_curso,co_empresa,co_sucursal,co_alumno,cat_esquema_pago,costo_colegiatura,costo_inscripcion,nota,usuario_inscribe,genero)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING ID;
-  `, [co_curso, co_empresa, co_sucursal, idAlumno, cat_esquema_pago, costo_colegiatura, costo_inscripcion, nota, usuario_inscribe, genero]);
+          INSERT INTO CO_INSCRIPCION(co_curso,co_empresa,co_sucursal,co_alumno,cat_esquema_pago,costo_colegiatura,costo_inscripcion,nota,usuario_inscribe,docente,dia_pago, banco,genero)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11,$12,$13) RETURNING ID;
+  `, [co_curso, co_empresa, co_sucursal, idAlumno, cat_esquema_pago, costo_colegiatura, costo_inscripcion, nota, usuario_inscribe,id_docente,dia_pago, banco, genero]);
 }
 
 const confirmarInscripcion = async(idInscripcion, inscripcionData) => {
