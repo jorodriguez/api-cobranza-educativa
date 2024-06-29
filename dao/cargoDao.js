@@ -60,6 +60,39 @@ const getCatCargo = async(id) => {
 
 
 
+
+const getColegiaturasPendientesCobranza = async(idSucursal) => {
+    console.log("@getColegiaturasPendientesCobranza");
+    return await genericDao.findAll(
+        `
+        select c.id,
+        to_char(c.fecha,'dd-MM-yyyy HH24:MI') as fecha_cargo,
+        tcargo.nombre as cargo,
+        c.cargo,
+        al.uid as uid_alumno,
+        al.foto as foto_alumno,
+        al.matricula as matricula,
+        al.nombre as alumno,
+        al.apellidos as apellidos,
+        curso.id as id_curso,
+        curso.uid as uid_curso,          				
+        curso.foto as foto_curso,
+        to_char(curso.hora_inicio,'HH24:MI') as hora_inicio_curso,
+        to_char(curso.hora_inicio,'HH24:MI') as hora_fin_curso,        
+        curso.nombre as especialidad                    
+    from co_cargo_balance_alumno c inner join cat_cargo tcargo on tcargo.id = c.cat_cargo                              
+                              inner join co_alumno al on al.id = c.co_alumno
+                              inner join co_curso curso on curso.id = c.co_curso    
+    where c.cat_cargo = $1 
+--                  		and semana.fecha_clase = getDate('')   
+        and curso.co_sucursal = $2
+        and c.pagado = false
+        and c.eliminado = false
+        
+        `, [CARGOS.ID_CARGO_MENSUALIDAD, idSucursal]);
+};
+
+/*
 const getColegiaturasPendientesCobranza = async(idSucursal) => {
     console.log("@getColegiaturasPendientesCobranza");
     return await genericDao.findAll(
@@ -98,7 +131,7 @@ const getColegiaturasPendientesCobranza = async(idSucursal) => {
         and c.eliminado = false
         order by semana.fecha_clase::date,(semana.fecha_clase=getDate('')), al.nombre,al.apellidos,esp.nombre desc
         `, [CARGOS.ID_CARGO_MENSUALIDAD, idSucursal]);
-};
+};*/
 
 
 const buscarCargoColegiatura = async(idCurso, idCoCursoSemana, idAlumno) => {
@@ -171,36 +204,32 @@ const getCargosAlumno = (uidAlumno, limite) => {
     //    let offset = (limite * pagina);
     return genericDao.findAll(
         ` 
-SELECT
-b.id as id_cargo_balance_alumno,
-b.fecha,
-to_char(b.fecha,'dd-mm-yyyy HH24:MI') as fecha_format,
-b.cantidad,
-cargo.nombre as nombre_cargo,
-cargo.aplica_descuento,
-b.texto_ayuda,
-cat_cargo as id_cargo,
-cargo.es_facturable,
-b.total as total,
-b.cargo,
-b.total_pagado,
-b.nota,
-b.pagado,               	                                         
-false as checked,
-0 as pago,
-    esp.nombre as especialidad,
-    semana.numero_semana_curso,
-    semana.numero_semana_curso as materia_modulo,
-    b.cat_esquema_pago
-FROM co_cargo_balance_alumno b inner join co_alumno a on b.co_alumno = a.id
-                            inner join cat_cargo cargo on b.cat_cargo = cargo.id					                                           
-                            left join co_curso curso on curso.id = b.co_curso
-                            left join cat_especialidad esp on esp.id = curso.cat_especialidad
-                            left join co_curso_semanas semana on semana.id = b.co_curso_semanas                                                 
-WHERE a.uid = $1 
-     and b.eliminado = false 
-    and a.eliminado = false
-ORDER by b.pagado, b.fecha desc
+        SELECT
+        b.id as id_cargo_balance_alumno,
+        b.fecha,
+        to_char(b.fecha,'dd-mm-yyyy HH24:MI') as fecha_format,
+        b.cantidad,
+        cargo.nombre as nombre_cargo,
+        cargo.aplica_descuento,
+        b.texto_ayuda,
+        cat_cargo as id_cargo,
+        cargo.es_facturable,
+        b.total as total,
+        b.cargo,
+        b.total_pagado,
+        b.nota,
+        b.pagado,               	                                         
+        false as checked,
+        0 as pago,
+        curso.nombre as especialidad,    
+        b.cat_esquema_pago
+    FROM co_cargo_balance_alumno b inner join co_alumno a on b.co_alumno = a.id
+                                inner join cat_cargo cargo on b.cat_cargo = cargo.id					                                           
+                                left join co_curso curso on curso.id = b.co_curso                                                        
+    WHERE a.uid = $1
+         and b.eliminado = false 
+        and a.eliminado = false
+    ORDER by b.pagado, b.fecha desc
          LIMIT ${limite}`, [uidAlumno]);
 
 };

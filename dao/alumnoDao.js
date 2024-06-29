@@ -123,6 +123,8 @@ const getAlumnoPorUId = (uidAlumno) => {
     return genericDao.findOne(`
     select 
         i.id,
+        a.uid,
+        a.id as id_alumno,
         c.id as id_curso,
         c.nombre as nombre_curso, 
         a.id as id_alumno,
@@ -135,6 +137,7 @@ const getAlumnoPorUId = (uidAlumno) => {
         a.correo,
         a.telefono,
         esquema.id as cat_esquema_pago,
+        a.total_adeudo,
         i.costo_colegiatura,
         i.dia_pago,
         i.banco,
@@ -143,7 +146,7 @@ const getAlumnoPorUId = (uidAlumno) => {
                       inner join co_alumno a on a.id = i.co_alumno
                       inner join usuario d on d.id = i.docente
                       inner join cat_esquema_pago esquema on esquema.id = i.cat_esquema_pago
-    where i.uid = $1 and i.eliminado = false and a.eliminado = false`, [uidAlumno]);
+    where a.uid = $1 and i.eliminado = false and a.eliminado = false`, [uidAlumno]);
 };
 
 const getAlumnoPorId = (idAlumno) => {
